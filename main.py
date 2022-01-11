@@ -9,14 +9,14 @@ nu = mu/rho
 Vinf = 20
 
 # XFOIL ouput
-theta = 0.002280                      # Momentum thickness
-delta_star = 0.018379
+theta = 0.013316                      # Momentum thickness
+delta_star = 0.027783
 shape_factor = 2.086
 delta = delta_star * shape_factor                       # BL thickness
 
 U_ratio = 0.93327
 Ue = Vinf *(U_ratio)            # Velocity at the boundary-layer edge
-Cf = 0.002623
+Cf = 0.001082
 Tw = 0.5*rho*Vinf*Vinf * Cf     # Shear stress
 
 # Dependent variables
@@ -34,3 +34,4 @@ print(phi_pp)
 x = np.linspace(100, 10001,9901)
 print(x.shape)
 plt.loglog(x, -10*np.log(phi_pp))
+
