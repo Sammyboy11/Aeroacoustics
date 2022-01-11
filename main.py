@@ -1,16 +1,25 @@
-# This is a sample Python script.
+import numpy as np
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+# Constants
+mu = 1.81*pow(10,-5)    # dynamic viscosity
+rho = 1.225
+nu = mu/rho
 
+# Variables
+omega = 20-20000        # frequency (to be inserted as an nparray?) 
+Vinf = 20
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# XFOIL ouput
+delta = 1                       # BL thickness
+theta = 1                       # Momentum thickness
+U_ratio = 1
+Ue = Vinf *(U_ratio)            # Velocity at the boundary-layer edge
+Cf = 1
+Tw = 0.5*rho*Vinf*Vinf * Cf     # Shear stress
 
+# Dependent variables
+Rt = 0.11* pow(Ue*theta/nu,0.75)
+k = omega*delta/Ue
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Goody's equation for surface pressure spectrum
+phi = (Tw*Tw*delta/Ue) * (3*k*k) / ( pow(pow(k,0.75) + 0.5, 3.7) + pow(1.1*pow(Rt,-0.57)*k, 7) )
