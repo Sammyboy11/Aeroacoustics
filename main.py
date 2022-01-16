@@ -160,8 +160,15 @@ for omega in range (100,10001):
 print('S_pp = ',S_pps)
 print(omega)
 x_2 = np.linspace(100, 10001,9901)
-plt.plot(np.log(x_2), 10*np.log(S_pps))
-plt.plot(np.log(x_2), 10*np.log(S_ppp))
+
+
+Pref = 2E-5 # Pa
+PSD = 10*np.log(Spp)-20*np.log(Pref) # dB
+PSDS = 10*np.log(SppS)-20*np.log(Pref) # dB
+PSDP = 10*np.log(SppP)-20*np.log(Pref) # dB
+plt.plot(np.log(x_2), PSD)
+plt.plot(np.log(x_2), PSDS)
+plt.plot(np.log(x_2), PSDP)
 plt.show()
 
 
