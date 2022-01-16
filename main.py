@@ -140,3 +140,13 @@ cI_2 = (1-(1+i)*E3)*np.exp(4*i*kappa);
 cI_2 = np.real(cI_2) + i*np.imag(cI_2)*eps;
 
 I_2 = H*cI_2 + H*(-np.exp(-2*i*O)+i*(O + k_x_bar + M*mu_bar-kappa)*G)
+
+
+
+
+
+
+
+
+
+ 
