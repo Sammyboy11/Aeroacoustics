@@ -9,15 +9,14 @@ U_c = 1
 mu = 1.81*pow(10,-5)    # dynamic viscosity
 rho = 1.225
 nu = mu/rho
-c=0.2#chord
-
+c = 0.2
 Vinf = 20
 
 # XFOIL ouput
-theta =  0.011968                    # Momentum thickness
-delta_star = 0.035869
-shape_factor = 2.997
-delta = delta_star * 8  # BL thickness
+theta = 0.013316                      # Momentum thickness
+delta_star = 0.027783
+shape_factor = 2.086
+delta = delta_star * shape_factor                       # BL thickness
 
 theta_2 = 0.004334                      # Momentum thickness
 delta_star_2 = 0.007812
@@ -46,8 +45,8 @@ for omega in range (100,10001):
     k = omega*delta/Ue
     # Goody's equation for surface pressure spectrum
     phi_pp[w] = (Tw*Tw*delta/Ue) * (3*k*k) / ( pow(pow(k,0.75) + 0.5, 3.7) + pow(1.1*pow(Rt,-0.57)*k, 7) )
-    
-    
+
+
     k_2 = omega*delta_2/Ue
     # Goody's equation for surface pressure spectrum
     phi_pp_2[w] = (Tw_2*Tw_2*delta_2/Ue) * (3*k_2*k_2) / ( pow(pow(k_2,0.75) + 0.5, 3.7) + pow(1.1*pow(Rt_2,-0.57)*k_2, 7) )
@@ -56,12 +55,8 @@ for omega in range (100,10001):
 print(phi_pp)
 x = np.linspace(100, 10001,9901)
 print(x.shape)
-plt.figure(1)
-plt.plot(np.log((x*delta)/Ue), 10*np.log(phi_pp/(Tw*Tw*delta/(Ue))))
-plt.plot(np.log((x*delta_2)/Ue), 10*np.log(phi_pp_2/(Tw_2*Tw_2*delta_2/Ue)))
-plt.xlabel("$\omega\delta/U_e$"); plt.ylabel("$10log(\Phi_{pp}*U_e/Tw^2\delta)$")
-
-
+plt.loglog(x, -10*np.log(phi_pp))
+plt.show()
 # =============================================================================
 # #Corcos model
 # =============================================================================
@@ -124,7 +119,7 @@ print(mu_bar); print(kappa); print(O); print(sigma)
 #      + (((1+eps)*(1-i))/(2*(O-2*kappa))) * (np.exp(4*i*k)*E3)\
 #      -(((1-eps)*(1+i))/(2*(O+2*kappa))) * (np.exp(-4*i*k)*E3_con)\
 #      +(np.exp(2*i*O)/2)*(np.sqrt(2*kappa/O)*E4)*(((1-eps)(1+i)/(O+2*kappa))-((1+eps)(1-i)/(O-2*kappa)))
-# 
+#
 # =============================================================================
 
 G  = (1+eps)*np.exp(i*(2*kappa+O))*np.sin((O-2*kappa))\
@@ -150,12 +145,14 @@ L = 0.08      # span length [m]
 w = 0
 S_pps = np.zeros(9901)
 S_ppp = np.zeros(9901)
+S_pp = np.zeros(9901)
 for omega in range (100,10001):
     k_bar = omega*c/(2*c_0)
     # Goody's equation for surface pressure spectrum
 
     S_pps[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / omega ) * phi_pp[w] * I**2
     S_ppp[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / omega ) * phi_pp_2[w] * I**2
+    S_pp[w] = S_pps[w] + S_ppp[w]
     w+=1
 print('S_pp = ',S_pps)
 print(omega)
@@ -163,11 +160,16 @@ x_2 = np.linspace(100, 10001,9901)
 
 
 Pref = 2E-5 # Pa
-PSD = 10*np.log(Spp)-20*np.log(Pref) # dB
-PSDS = 10*np.log(SppS)-20*np.log(Pref) # dB
-PSDP = 10*np.log(SppP)-20*np.log(Pref) # dB
+#S_pp = S_pps + S_ppp
+
+PSD = 10*np.log(S_pp)-20*np.log(Pref) # dB
+PSDS = 10*np.log(S_pps)-20*np.log(Pref) # dB
+PSDP = 10*np.log(S_ppp)-20*np.log(Pref) # dB
+
 plt.plot(np.log(x_2), PSD)
+plt.show()
 plt.plot(np.log(x_2), PSDS)
+plt.show()
 plt.plot(np.log(x_2), PSDP)
 plt.show()
 
