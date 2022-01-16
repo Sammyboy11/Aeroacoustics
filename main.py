@@ -141,9 +141,28 @@ cI_2 = np.real(cI_2) + i*np.imag(cI_2)*eps;
 
 I_2 = H*cI_2 + H*(-np.exp(-2*i*O)+i*(O + k_x_bar + M*mu_bar-kappa)*G)
 
+I = abs(I_1 + I_2)
 
+# S_gg calculations
 
+alpha = 0.625   # Defined
+L = 0.08      # span length [m]
+w = 0
+S_pps = np.zeros(9901)
+S_ppp = np.zeros(9901)
+for omega in range (100,10001):
+    k_bar = omega*c/(2*c_0)
+    # Goody's equation for surface pressure spectrum
 
+    S_pps[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / omega ) * phi_pp[w] * I**2
+    S_ppp[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / omega ) * phi_pp_2[w] * I**2
+    w+=1
+print('S_pp = ',S_pps)
+print(omega)
+x_2 = np.linspace(100, 10001,9901)
+plt.plot(np.log(x_2), 10*np.log(S_pps))
+plt.plot(np.log(x_2), 10*np.log(S_ppp))
+plt.show()
 
 
 
