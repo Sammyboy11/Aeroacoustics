@@ -10,9 +10,9 @@ nu  = mu/rho                        # kinematic viscosity
 c   = 0.2                           # chord length of airfoil
 
 U_inf = 20                          # freestream velocity
-U_c  = 0.6 * U_inf                  # BL convective velocity at TE
+U_c  = 0.8 * U_inf                  # BL convective velocity at TE
 
-omega_i = 10                        # start frequency
+omega_i = 100                        # start frequency
 omega_f = 10000 + 1                 # end frequency
 
 
@@ -40,7 +40,7 @@ delta_2 = delta_star_2 * 8          # BL thickness
 U_ratio_2 = 0.92030             
 Ue_2 = U_inf *(U_ratio_2)           # Velocity at the boundary-layer edge
 Cf_2 = 0.002566                     # Skin friction coefficient at TE
-Tw_2 = 0.5*rho*U_inf**2 * Cf_2   # Shear stress at TE due to BL
+Tw_2 = 0.5*rho*U_inf**2 * Cf_2      # Shear stress at TE due to BL
 
 Rt_2 = 0.11* pow(Ue_2*theta_2/nu,0.75)
 
@@ -81,7 +81,7 @@ plt.show()
 alpha = 1.6                     # correlation length constant
 L = 0.08                        # span length of airfoil [m]
 c_0 = 334                       # speed of sound [m/s]
-M = U_c /c_0                    # convection Mach number
+M = U_c /c_0   #U_inf/c_0                 # convection Mach number
 
 w = 0
 S_pp_SS = np.zeros(omega_f - omega_i)
@@ -92,32 +92,32 @@ S_pp_Total = np.zeros(omega_f - omega_i)
 for omega in range (omega_i, omega_f):
         
     # Radiation integral function calculation
-    K_x = (omega*c)/(2*U_c)
+    K_x = (omega*c)/(2*U_c)   #  omega/U_c or (omega*c)/(2*U_c)
     al = Ue/U_c
     beta = np.sqrt(1-M**2)
     mu_bar = (omega*c)/(2*c_0*beta**2)
 
-    xr = 0
+    xr = 1
     yr = 0
-    zr = 1
+    zr = 0.004
     sigma = np.sqrt(xr**2 + (beta**2)*(yr**2 + zr**2))
 
-
-    k_x = omega/U_inf
+    k_bar = omega*c/(2*c_0)
+    k_x = omega/U_c
     k_y = omega*yr/(c_0*sigma)
     k_y_bar = k_y*c/2
     k_x_bar = k_x*c/2
-    kappa = np.sqrt(mu_bar**2-k_y_bar**2/beta**2)
-    eps = 1/np.sqrt(1+1/(4*kappa))
+    kappa = np.sqrt(mu_bar**2 - (k_y_bar**2/beta**2))
+    eps = 1/np.sqrt(1+(1/(4*kappa)))
 
-
-    B = K_x - M*mu_bar + kappa
+    i = 0+1j                            #imaginary
+    B = K_x - M * mu_bar + kappa
     C = K_x - mu_bar*(xr/sigma - M)
-    i = 0+1j #imaginary
     O = kappa - mu_bar*xr/sigma
-    H = ((1+i)*np.exp(i*(-4*i*kappa))*(1-O**2))/(2*np.sqrt(np.pi)*(al-1)*k_x_bar*np.sqrt(B))
-
-
+    
+    Theta = np.sqrt((k_x_bar + mu_bar * M + kappa)/(al * k_x_bar + mu_bar * M + kappa))
+    H = (1+i)*np.exp(-4*i*kappa)*(1-Theta**2)/(2*np.sqrt(np.pi)*(al-1)*k_x_bar*np.sqrt(B))
+    
     Es1, Ec1 = sc.fresnel((2*B-2*C)*np.sqrt(2/np.pi))
     E1 = Ec1 + i*Es1
 
@@ -131,11 +131,11 @@ for omega in range (omega_i, omega_f):
     Es4, Ec4 = sc.fresnel((2*O)*np.sqrt(2/np.pi))
     E4 = Ec4 + i*Es4
     
-    G  = (1+eps)*np.exp(i*(2*kappa+O))*np.sin((O-2*kappa)) \
-         + (1-eps)*np.exp(i*(O-2*kappa))*np.sin((O+2*kappa)) \
+    G  = (1+eps)*np.exp(i*(2*kappa+O))*np.sin((O-2*kappa))/(O-2*kappa) \
+         + (1-eps)*np.exp(i*(O-2*kappa))*np.sin((O+2*kappa))/(O+2*kappa) \
          + (1+eps)*(1-i)*np.exp(4*i*kappa)*E3/(2*(O-2*kappa)) \
          - (1-eps)*(1+i)*np.exp(-4*i*kappa)*E3_con/(2*(O+2*kappa)) \
-         + 0.5*np.exp(2*i*O)*np.sqrt(2*kappa/O)*E4*((1-eps)*(1+i)/(O+2*kappa)-(1+eps)*(1-i)/(O-2*kappa))
+         + 0.5*np.exp(2*i*O)*np.sqrt(2*kappa/O)*E4*(((1-eps)*(1+i)/(O+2*kappa))-((1+eps)*(1-i)/(O-2*kappa)))
 
 
     I_1 = i*np.exp(2*i*C)*((1+i)*np.exp(-2*i*C)*np.sqrt(B/(B-C))*E1 - (1+i)*E2 + 1)/C
@@ -143,11 +143,9 @@ for omega in range (omega_i, omega_f):
     cI_2 = (1-(1+i)*E3)*np.exp(4*i*kappa);
     cI_2 = np.real(cI_2) + i*np.imag(cI_2)*eps;
 
-    I_2 = H*cI_2 + H*(-np.exp(-2*i*O)+i*(O + k_x_bar + M*mu_bar-kappa)*G)
+    I_2 = H*cI_2 + H*(-np.exp(-2*i*O)+i*(O + k_x_bar + M*mu_bar - k_bar)*G)
 
     I = abs(I_1 + I_2)
-
-    k_bar = omega*c/(2*c_0)
     
     # Amiet's TE theory: Power spectral density
     S_pp_SS[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / omega ) * phi_pp[w] * I**2
@@ -157,27 +155,24 @@ for omega in range (omega_i, omega_f):
     w+=1
 
 
-# %% Calculating PSD
+# %% Calculating SPL
 
 Pref = 2E-5                                         # reference pressure
 
-PSD = 10*np.log10(S_pp_Total)-20*np.log10(Pref)     # dB
-PSD_SS = 10*np.log10(S_pp_SS)-20*np.log10(Pref)     # dB
-PSD_PS = 10*np.log10(S_pp_PS)-20*np.log10(Pref)     # dB
+SPL = 10*np.log10(S_pp_Total)-20*np.log10(Pref)     # dB
+SPL_SS = 10*np.log10(S_pp_SS)-20*np.log10(Pref)     # dB
+SPL_PS = 10*np.log10(S_pp_PS)-20*np.log10(Pref)     # dB
 
+#Sf = pow(SPL/10,10)
+
+#OASPL = 10*np.log10(E)
 
 # %% Plotting PSD
-plt.plot(np.log10(x_axis), PSD_SS, label = 'SS')
-plt.plot(np.log10(x_axis), PSD_PS, label = 'PS')
+plt.plot(np.log10(x_axis), SPL_SS, label = 'SS')
+plt.plot(np.log10(x_axis), SPL_PS, label = 'PS')
 plt.legend()
 
 plt.show()
-plt.plot(np.log10(x_axis), PSD, label = 'SS + PS')
+plt.plot(np.log10(x_axis), SPL, label = 'SS + PS')
 plt.legend()
 plt.show()
-
-
-
-
-
- 
