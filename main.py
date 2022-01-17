@@ -163,9 +163,10 @@ SPL = 10*np.log10(S_pp_Total)-20*np.log10(Pref)     # dB
 SPL_SS = 10*np.log10(S_pp_SS)-20*np.log10(Pref)     # dB
 SPL_PS = 10*np.log10(S_pp_PS)-20*np.log10(Pref)     # dB
 
-#Sf = pow(SPL/10,10)
-
-#OASPL = 10*np.log10(E)
+Sf = pow(SPL/10,10)
+for omega in range (omega_i, omega_f):
+    E = Sf
+OASPL = 10*np.log10(E)
 
 # %% Plotting PSD
 plt.plot(np.log10(x_axis), SPL_SS, label = 'SS')
