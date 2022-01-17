@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import scipy.special as sc
-
+from scipy import integrate
 
 # %% Constants
 rho = 1.225                         # air density
@@ -164,10 +164,12 @@ SPL_SS = 10*np.log10(S_pp_SS)-20*np.log10(Pref)     # dB
 SPL_PS = 10*np.log10(S_pp_PS)-20*np.log10(Pref)     # dB
 
 Sf = pow(SPL/10,10)
-for omega in range (omega_i, omega_f):
-    E = Sf
-OASPL = 10*np.log10(E)
 
+E = (omega_f-omega_i)*sum(Sf)/len(Sf)
+E_t = integrate.trapz(Sf,x_axis)
+OASPL = 10*np.log10(E_t)
+print(E_t)
+print(OASPL)
 # %% Plotting PSD
 plt.plot(np.log10(x_axis), SPL_SS, label = 'SS')
 plt.plot(np.log10(x_axis), SPL_PS, label = 'PS')
