@@ -13,7 +13,7 @@ U_inf = 20                          # freestream velocity
 U_c  = 0.8 * U_inf                  # BL convective velocity at TE
 
 omega_i = 100                        # start frequency
-omega_f = 10000 + 1                 # end frequency
+omega_f = (10000 + 1)                 # end frequency
 
 
 # %% XFOIL output parameters
@@ -55,11 +55,11 @@ w = 0                                        # increment counter
 
 for omega in range (omega_i, omega_f):
     # Goody's equation for surface pressure spectrum on SS
-    k = omega*delta/Ue
+    k = 2*np.pi*omega*delta/Ue
     phi_pp[w] = (Tw*Tw*delta/Ue) * (3*k*k) / ( pow(pow(k,0.75) + 0.5, 3.7) + pow(1.1*pow(Rt,-0.57)*k, 7) )
 
     # Goody's equation for surface pressure spectrum on PS
-    k_2 = omega*delta_2/Ue
+    k_2 = 2*np.pi*omega*delta_2/Ue
     phi_pp_2[w] = (Tw_2*Tw_2*delta_2/Ue) * (3*k_2*k_2) / ( pow(pow(k_2,0.75) + 0.5, 3.7) + pow(1.1*pow(Rt_2,-0.57)*k_2, 7) )
     
     w+=1                                    # counter increment
@@ -92,19 +92,19 @@ S_pp_Total = np.zeros(omega_f - omega_i)
 for omega in range (omega_i, omega_f):
         
     # Radiation integral function calculation
-    K_x = (omega*c)/(2*U_c)   #  omega/U_c or (omega*c)/(2*U_c)
+    K_x = (2*np.pi*omega*c)/(2*U_c)   #  omega/U_c or (omega*c)/(2*U_c)
     al = Ue/U_c
     beta = np.sqrt(1-M**2)
-    mu_bar = (omega*c)/(2*c_0*beta**2)
+    mu_bar = (2*np.pi*omega*c)/(2*c_0*beta**2)
 
     xr = 1
     yr = 0
-    zr = 0.004
+    zr = 1
     sigma = np.sqrt(xr**2 + (beta**2)*(yr**2 + zr**2))
 
-    k_bar = omega*c/(2*c_0)
-    k_x = omega/U_c
-    k_y = omega*yr/(c_0*sigma)
+    k_bar = 2*np.pi*omega*c/(2*c_0)
+    k_x = 2*np.pi*omega/U_c
+    k_y = 2*np.pi*omega*yr/(c_0*sigma)
     k_y_bar = k_y*c/2
     k_x_bar = k_x*c/2
     kappa = np.sqrt(mu_bar**2 - (k_y_bar**2/beta**2))
@@ -148,8 +148,8 @@ for omega in range (omega_i, omega_f):
     I = abs(I_1 + I_2)
     
     # Amiet's TE theory: Power spectral density
-    S_pp_SS[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / omega ) * phi_pp[w] * I**2
-    S_pp_PS[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / omega ) * phi_pp_2[w] * I**2
+    S_pp_SS[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / 2*np.pi*omega ) * phi_pp[w] * I**2
+    S_pp_PS[w] = ((k_bar * zr)/(2*np.pi*sigma**2))**2  * 2 * L * (alpha * U_c / 2*np.pi*omega ) * phi_pp_2[w] * I**2
     S_pp_Total[w] = S_pp_SS[w] + S_pp_PS[w]
     
     w+=1
